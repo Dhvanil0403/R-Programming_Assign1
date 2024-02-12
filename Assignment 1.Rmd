@@ -1,0 +1,159 @@
+---
+title: "Assignment 1"
+output: pdf_document
+date: "2024-02-11"
+---
+
+```{r setup, include=FALSE}
+netflix <- read.csv("C:/Users/Dhvanil/Desktop/Courses/4066 Intro to Analytical System/netflix1.csv")
+library(DescTools)
+```
+
+Question 1 - Print the structure of your dataset.
+
+
+```{r Q1}
+str(netflix)
+```
+
+
+Question 2 - List the variables in your dataset
+
+```{r Q2}
+names(netflix)
+```
+
+
+Question 3 - Print the top 15 rows of your dataset
+
+```{r Q3}
+head(netflix, 15)
+```
+
+Question 4 - Write a user defined function using any of the variables from the data set.
+
+```{r Q4}
+year_with_highest_frequency <- function(data) {
+  year_counts <- table(data$release_year)
+  year_with_highest <- names(year_counts)[which.max(year_counts)]
+  return(year_with_highest)
+}
+year_highest_frequency <- year_with_highest_frequency(netflix)
+```
+
+Question 5 - Use data manipulation techniques and filter rows based on any logical criteria that exist in your dataset.
+
+```{r Q5}
+shows_in_1990 <- subset(netflix, release_year == "1990")
+print(shows_in_1990)
+```
+
+Question 6 - Identify the dependent & independent variables and use reshaping techniques and create a new data frame by joining those variables from your dataset.
+
+```{r Q6}
+library(dplyr)
+library(tidyr)
+rating_counts <- netflix %>%
+    group_by(release_year, rating) %>%
+    summarise(count = n()) %>%
+    ungroup()
+rating_counts_wide <- rating_counts %>%
+    pivot_wider(names_from = rating, values_from = count, values_fill = 0)
+print(rating_counts_wide)
+```
+
+Question 7 - Remove missing values in your dataset.
+
+```{r Q7}
+netflix_clean <- na.omit(netflix)
+```
+
+Question 8 - Identify and remove duplicated data in your dataset
+
+```{r Q8}
+duplicated_rows <- duplicated(netflix)
+netflix_unique <- netflix[!duplicated_rows, ]
+```
+
+Question 9 - Reorder multiple rows in descending order
+
+```{r Q9}
+netflix_ordered <- netflix[order(netflix$release_year, decreasing = TRUE), ]
+```
+
+Question 10 - Rename some of the column names in your dataset
+
+```{r Q10}
+names(netflix)[names(netflix) == "listed_in"] <- "Category"
+```
+
+Question 11 - Add new variables in your data frame by using a mathematical function (for e.g. – multiply an existing column by 2 and add it as a new variable to your data frame)
+
+```{r Q11}
+netflix$release_year_double <- netflix$release_year * 2
+```
+
+Question 12 - Create a training set using random number generator engine
+
+```{r Q12}
+set.seed(123)
+train_indices <- sample(nrow(netflix), 0.8 * nrow(netflix))
+train_set <- netflix[train_indices, ]
+```
+
+Question 13 - Print the summary statistics of your dataset
+
+```{r Q13}
+summary(netflix)
+```
+
+Question 14 - Use any of the numerical variables from the dataset and perform the following statistical functions
+Mean
+Median
+Mode
+Range
+
+```{r Q14}
+# Mean
+mean_release_year <- mean(netflix$release_year, na.rm = TRUE)
+
+# Median
+median_release_year <- median(netflix$release_year, na.rm = TRUE)
+
+# Mode
+mode_release_year <- Mode(netflix$release_year)
+
+# Range
+range_release_year <- range(netflix$release_year, na.rm = TRUE)
+```
+
+Questions 15 - Plot a scatter plot for any 2 variables in your dataset
+
+```{r pressure, echo=FALSE}
+netflix$duration_numeric <- as.numeric(gsub("[^0-9]", "", netflix$duration))
+
+# Replaced 'Season' values with an assumed duration
+season_duration <- 10 * 30  # Assumed duration for one season (10 episodes, 30 minutes each)
+
+netflix$duration_numeric[grepl("Season", netflix$duration)] <- season_duration
+
+plot(netflix$release_year, netflix$duration_numeric,
+     xlab = "Release Year", ylab = "Duration (minutes)",
+     main = "Scatter Plot of Release Year vs Duration", col = "blue")
+```
+
+Question 16 - Plot a bar plot for any 2 variables in your dataset
+
+```{r pressure1, echo=FALSE}
+barplot(table(netflix$rating),
+              xlab = "Rating",
+              ylab = "Count",
+              main = "Bar Plot of Show Count by Rating", col = "red")
+```
+
+Question 17 - Find the correlation between any 2 variables by applying least square linear regression model
+
+```{r Q17}
+model <- lm(duration_numeric ~ release_year, data = netflix)
+summary(model)
+```
